@@ -10,26 +10,30 @@ import {
   unstable_noStore as noStore,
 } from 'next/cache';
 
-let googleAuth = new auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    client_id: process.env.GOOGLE_CLIENT_ID,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    // client_secret: process.env.GOOGLE_PRIVATE_KEY,
-  },
-  // keyFile: "./jwt.keys.json",
-  scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
-});
+const youtubePrivateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+let googleAuth = youtubePrivateKey
+  ? new auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        private_key: youtubePrivateKey,
+      },
+      scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
+    })
+  : null;
 
 // let googleAuth = new auth.OAuth2({
 //   client_id: process.env.GOOGLE_CLIENT_ID,
 //   private_key: process.env.GOOGLE_PRIVATE_KEY
 // });
 
-let yt = youtube({
-  version: 'v3',
-  auth: googleAuth,
-});
+let yt = googleAuth
+  ? youtube({
+      version: 'v3',
+      auth: googleAuth,
+    })
+  : null;
 
 export async function getBlogViews() {
   if (!process.env.POSTGRES_URL) {
@@ -49,7 +53,7 @@ export async function getViewsCount(): Promise<
   { slug: string; count: number }[] | never
 > {
   if (!process.env.POSTGRES_URL) {
-    return [];
+    return { rows: [] };
   }
 
   noStore();
@@ -76,13 +80,21 @@ export async function getViewsCount(): Promise<
 // );
 
 export const getSeifYouTubeSubs = async () => {
-  let response = await yt.channels.list({
-    id: ['UCWUxXzMaxN3j9JOXEuAkHJA'],
-    part: ['statistics'],
-  });
+  if (!yt) {
+    return '0';
+  }
 
-  let channel = response.data.items![0];
-  return Number(channel?.statistics?.subscriberCount).toLocaleString();
+  try {
+    let response = await yt.channels.list({
+      id: ['UCWUxXzMaxN3j9JOXEuAkHJA'],
+      part: ['statistics'],
+    });
+
+    let channel = response.data.items![0];
+    return Number(channel?.statistics?.subscriberCount).toLocaleString();
+  } catch {
+    return '0';
+  }
 };
 
 // export const getVercelYouTubeSubs = cache(
@@ -102,18 +114,26 @@ export const getSeifYouTubeSubs = async () => {
 // );
 
 export const getVercelYouTubeSubs = async () => {
-  let response = await yt.channels.list({
-    id: ['UCWUxXzMaxN3j9JOXEuAkHJA'],
-    part: ['statistics'],
-  });
+  if (!yt) {
+    return '0';
+  }
 
-  let channel = response.data.items![0];
-  return Number(channel?.statistics?.subscriberCount).toLocaleString();
+  try {
+    let response = await yt.channels.list({
+      id: ['UCWUxXzMaxN3j9JOXEuAkHJA'],
+      part: ['statistics'],
+    });
+
+    let channel = response.data.items![0];
+    return Number(channel?.statistics?.subscriberCount).toLocaleString();
+  } catch {
+    return '0';
+  }
 };
 
 export async function getGuestbookEntries() {
   if (!process.env.POSTGRES_URL) {
-    return [];
+    return { rows: [] };
   }
 
   noStore();

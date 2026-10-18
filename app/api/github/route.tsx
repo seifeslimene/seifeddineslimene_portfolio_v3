@@ -1,11 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { Octokit } from 'octokit';
 
+export const dynamic = 'force-dynamic';
+
 const octokit = new Octokit({
   auth: process.env.NEXT_PUBLIC_TOKEN,
 });
 
 export async function GET(req: NextRequest) {
+  if (!process.env.NEXT_PUBLIC_TOKEN) {
+    return NextResponse.json({ ContentsToList: [] });
+  }
+
   // Login
   const {
     data: { login },

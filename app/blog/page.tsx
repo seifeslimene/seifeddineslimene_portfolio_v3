@@ -1,55 +1,75 @@
-// @ts-nocheck
 import Link from 'next/link';
-import { Suspense } from 'react';
-import ViewCounter from './view-counter';
-import { getViewsCount } from 'app/db/queries';
-import { getBlogPosts } from 'app/db/blog';
+import { articles } from 'app/data/articles';
 
 export const metadata = {
   title: 'Blog',
-  description: 'Read my thoughts on software development, design, and more.',
+  description:
+    'Technical articles and tutorials by Seif Eddine Slimene on React, Next.js, and modern fullstack development.',
 };
 
+function formatDate(date: string) {
+  return new Date(`${date}T00:00:00`).toLocaleString('en-us', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default function BlogPage() {
-  let allBlogs = getBlogPosts();
+  const featured = articles.filter((article) => article.featured);
+  const rest = articles.filter((article) => !article.featured);
 
   return (
     <section>
-      <h1 className="font-medium text-2xl mb-8 tracking-tighter">
-        read my blog
-      </h1>
-      <h2>🚧 Under construction</h2>
-      {/* {allBlogs
-        .sort((a, b) => {
-          if (
-            new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
-          ) {
-            return -1;
-          }
-          return 1;
-        })
-        .map((post) => (
-          <Link
-            key={post.slug}
-            className="flex flex-col space-y-1 mb-4"
-            href={`/blog/${post.slug}`}
-          >
-            <div className="w-full flex flex-col">
-              <p className="text-neutral-900 dark:text-neutral-100 tracking-tight">
-                {post.metadata.title}
+      <h1 className="font-medium text-2xl mb-8 tracking-tighter">read my blog</h1>
+      <div className="flex flex-col gap-10">
+        {featured.map((article) => (
+          <article key={article.slug} className="flex flex-col gap-3">
+            <Link href={`/blog/${article.slug}`}>
+              <img
+                src={encodeURI(article.image)}
+                alt={article.title}
+                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-800"
+              />
+            </Link>
+            <Link
+              href={`/blog/${article.slug}`}
+              className="text-xl font-medium tracking-tight hover:underline"
+            >
+              {article.title}
+            </Link>
+            <p className="text-neutral-700 dark:text-neutral-300">{article.summary}</p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              {article.readTime}
+            </p>
+          </article>
+        ))}
+      </div>
+      <h2 className="font-medium text-xl mt-16 mb-6 tracking-tight">All Articles</h2>
+      <div className="flex flex-col gap-6">
+        {rest.map((article) => (
+          <article key={article.slug} className="flex flex-col gap-3">
+            <Link href={`/blog/${article.slug}`}>
+              <img
+                src={encodeURI(article.image)}
+                alt={article.title}
+                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-800"
+              />
+            </Link>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <Link
+                href={`/blog/${article.slug}`}
+                className="font-medium tracking-tight hover:underline"
+              >
+                {article.title}
+              </Link>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                {formatDate(article.date)}
               </p>
-              <Suspense fallback={<p className="h-6" />}>
-                <Views slug={post.slug} />
-              </Suspense>
             </div>
-          </Link>
-        ))} */}
+          </article>
+        ))}
+      </div>
     </section>
   );
-}
-
-async function Views({ slug }: { slug: string }) {
-  let { rows } = await getViewsCount();
-
-  return <ViewCounter allViews={rows} slug={slug} />;
 }

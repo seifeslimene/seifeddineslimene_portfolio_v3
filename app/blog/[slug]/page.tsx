@@ -9,10 +9,27 @@ import ViewCounter from '../view-counter';
 import { increment } from 'app/db/actions';
 import { unstable_noStore as noStore } from 'next/cache';
 import { log } from 'console';
+import { articles } from 'app/data/articles';
 
 export async function generateMetadata({
   params,
 }): Promise<Metadata | undefined> {
+  let article = articles.find((item) => item.slug === params.slug);
+  if (article) {
+    return {
+      title: article.title,
+      description: article.summary || article.title,
+      openGraph: {
+        title: article.title,
+        description: article.summary || article.title,
+        type: 'article',
+        publishedTime: article.date,
+        url: `https://v3.seifeddineslimene.com/blog/${article.slug}`,
+        images: [{ url: article.image }],
+      },
+    };
+  }
+
   let post = getBlogPosts().find((post) => post.slug === params.slug);
   if (!post) {
     return;
@@ -85,6 +102,35 @@ function formatDate(date: string) {
 }
 
 export default function Blog({ params }) {
+  let article = articles.find((item) => item.slug === params.slug);
+  if (article) {
+    return (
+      <section>
+        <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
+          {article.title}
+        </h1>
+        <p className="mt-2 mb-8 text-sm text-neutral-600 dark:text-neutral-400">
+          {new Date(`${article.date}T00:00:00`).toLocaleString('en-us', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+          {article.readTime ? ` · ${article.readTime}` : ''}
+        </p>
+        <img
+          src={encodeURI(article.image)}
+          alt={article.title}
+          className="mb-8 w-full rounded-lg"
+        />
+        {article.summary ? (
+          <article className="prose prose-quoteless prose-neutral dark:prose-invert">
+            <p>{article.summary}</p>
+          </article>
+        ) : null}
+      </section>
+    );
+  }
+
   let post = getBlogPosts().find((post) => post.slug === params.slug);
 
   if (!post) {
