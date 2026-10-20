@@ -37,7 +37,7 @@ export default function ProjectPage() {
                 ))}
               </div>
             )}
-            <div className="flex flex-wrap gap-3 text-sm">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
               {project.githubLinks.map((link) => (
                 <a
                   key={link.url}
@@ -49,6 +49,16 @@ export default function ProjectPage() {
                   {link.label}
                 </a>
               ))}
+              {project.link ? (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white dark:bg-white dark:text-neutral-900"
+                >
+                  Visit
+                </a>
+              ) : null}
             </div>
             {index < projects.length - 1 && (
               <div className="mt-10 flex items-center gap-4" aria-hidden="true">

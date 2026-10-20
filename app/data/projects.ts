@@ -12,6 +12,7 @@ export type PortfolioProject = {
   images: string[];
   githubLinks: GithubLink[];
   category: 'Websites' | 'Mobile';
+  link?: string;
 };
 
 export const projects: PortfolioProject[] = [
@@ -108,6 +109,7 @@ export const projects: PortfolioProject[] = [
         "url": "https://github.com/seifeslimene/booking_system_plugin_clone"
       }
     ],
+    "link": "https://booking.seifeddineslimene.com",
     "category": "Websites"
   },
   {
@@ -343,6 +345,7 @@ export const projects: PortfolioProject[] = [
         "url": "https://github.com/seifeslimene/react_phone_ecommerce"
       }
     ],
+    "link": "https://phonestore.seifeddineslimene.com",
     "category": "Websites"
   },
   {
@@ -563,6 +566,7 @@ export const projects: PortfolioProject[] = [
         "url": "https://github.com/seifeslimene/vanille_online_store"
       }
     ],
+    "link": "https://vanilla.seifeddineslimene.com",
     "category": "Websites"
   }
 ];
